@@ -12,6 +12,9 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SpectrogramPlot.h"
+#include "ICCCSpectrogram.h"
+
+
 
 
 //==============================================================================
@@ -59,6 +62,9 @@ public:
 
 	float noteOnVel = 0.5f; // to change the volumne level
 	SpectrogramComponent plotSpect; // to plot the spectrogram on the fly
+	ICCCSpectrogramCal iccc;
+	
+
 
 private:
     //==============================================================================

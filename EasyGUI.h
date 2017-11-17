@@ -35,6 +35,7 @@
                                                                     //[/Comments]
 */
 class S3AButtonGUI  : public AudioProcessorEditor,
+                      public Timer,
                       public SliderListener
 {
 public:
@@ -44,6 +45,18 @@ public:
 
     //==============================================================================
     //[UserMethods]     -- You can add your own custom methods in this section.
+	void timerCallback() override
+	{
+		//processor.noteOnVel = (float)slider->getValue();
+		double newFs = processor.getSampleRate();
+		if(newFs!=Fs)
+		{
+			Fs = newFs;
+			String fsStr;
+			fsStr << Fs;
+			fsLabel->setText(fsStr,dontSendNotification);
+		}
+	}
     //[/UserMethods]
 
     void paint (Graphics& g) override;
@@ -53,13 +66,15 @@ public:
     // Binary resources:
     static const char* cat_jpg;
     static const int cat_jpgSize;
+    static const char* cat_jpg2;
+    static const int cat_jpg2Size;
 
 
 private:
     //[UserVariables]   -- You can add your own custom variables in this section.
 	// This reference is provided as a quick way for your editor to access the processor object that created it
 	S3abuttonAudioProcessor& processor;
-	//ScopedPointer<ImageButton> spectrumImageButton;
+	double Fs = 0.0;
     //[/UserVariables]
 
     //==============================================================================
@@ -67,6 +82,8 @@ private:
     ScopedPointer<Label> label;
     ScopedPointer<Slider> slider;
     ScopedPointer<Label> label2;
+    ScopedPointer<Label> label3;
+    ScopedPointer<Label> fsLabel;
 
 
     //==============================================================================

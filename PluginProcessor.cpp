@@ -11,8 +11,7 @@
 #include "PluginProcessor.h"
 #include "EasyGUI.h"
 //#include "SpectrogramPlot.h"
-
-
+//using namespace std;
 
 //==============================================================================
 S3abuttonAudioProcessor::S3abuttonAudioProcessor()
@@ -28,6 +27,7 @@ S3abuttonAudioProcessor::S3abuttonAudioProcessor()
 #endif
 {
 	plotSpect.startTimer(100);
+	iccc.startTimer(2000);
 }
 
 S3abuttonAudioProcessor::~S3abuttonAudioProcessor()
@@ -92,6 +92,7 @@ void S3abuttonAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+	iccc.initParams(sampleRate);
 }
 
 void S3abuttonAudioProcessor::releaseResources()
@@ -159,9 +160,20 @@ void S3abuttonAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffe
 			}
 				
 		}
-			
 
     }
+
+	// push the data to calculate the ICCC
+	if (totalNumInputChannels >= 2) // at least two channels
+	{
+		float* channelData1 = buffer.getWritePointer(0);
+		float* channelData2 = buffer.getWritePointer(1);
+		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+		{
+			iccc.pushNextSampleIntoFifo(channelData1[sample], channelData2[sample]);
+		}
+	}
+
 }
 
 //==============================================================================

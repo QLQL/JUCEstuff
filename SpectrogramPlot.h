@@ -3,7 +3,9 @@
 #ifndef SPECTROGRAMPLOT_H
 #define SPECTROGRAMPLOT_H
 
+#include <cmath>
 #include "../JuceLibraryCode/JuceHeader.h"
+//using namespace std;
 
 class SpectrogramComponent : public Component,
 							 public Timer
@@ -14,6 +16,7 @@ public:
 	{
 		const int frameN = 512;
 		spectrogramImage = Image(Image::RGB, frameN, 512, true);
+		zeromem(realMaxLevelArray, sizeof(realMaxLevelArray));
 	};
 	~SpectrogramComponent() {};
 
@@ -40,13 +43,13 @@ public:
 				memcpy(fftData, &fifo[startIndex], sizeof(float)*fftSize);
 				//memcpy(fftData, fifo , sizeof(float)*fftSize);
 				drawNextLineOfSpectrogram();
-				nextFFTBlockReady = false;
 				startIndex += fftSize;
 				if (startIndex >= bufferLength)
 				{ 
 					startIndex = 0;
 				}
 			}
+			nextFFTBlockReady = false;
 
 			//After the above processing, maybe NumFFT has changed
 			if (tempNumFFT < NumFFT)
@@ -90,6 +93,21 @@ public:
 		// find the range of values produced, so we can scale our rendering to
 		// show up the detail clearly
 		Range<float> maxLevel = FloatVectorOperations::findMinAndMax(fftData, fftSize / 2);
+		float realMaxLevel = jmax(maxLevel.getEnd(), 1e-5f);
+		//// shift the max values in the array to the left by 1 frame
+		//int N = int (sizeof(realMaxLevelArray) / sizeof(realMaxLevelArray[0]));
+		//for (int i = 0; i <  N - 1; ++i)
+		//{
+		//	realMaxLevelArray[i] = realMaxLevelArray[i + 1];
+		//}
+		//realMaxLevelArray[N-1] = realMaxLevel;
+		//float tempMax = * (std::max_element(realMaxLevelArray, realMaxLevelArray + N));
+		//if ( (tempMax>useMaxLevel) || (tempMax< useMaxLevel/4.0f) )
+		//{
+		//	useMaxLevel = tempMax * 1.5f;
+		//}
+		
+	
 
 		// print some temporary results
 		/*String message;
@@ -99,7 +117,8 @@ public:
 		{
 			const float skewedProportionY = 1.0f - std::exp(std::log(y / (float)imageHeight) * 0.2f);
 			const int fftDataIndex = jlimit(0, fftSize / 2, (int)(skewedProportionY * fftSize / 2));
-			const float level = jmap(fftData[fftDataIndex], 0.0f, jmax(maxLevel.getEnd(), 1e-5f), 0.0f, 1.0f);
+			//const float level = jmap(fftData[fftDataIndex], 0.0f, useMaxLevel, 0.0f, 1.0f);
+			const float level = jmap(fftData[fftDataIndex], 0.0f, realMaxLevel, 0.0f, 1.0f);
 			//message << y << "(" << fftDataIndex << ")    ";
 			spectrogramImage.setPixelAt(rightHandEdge, y, Colour::fromHSV(level, 1.0f, level, 1.0f));
 		}
@@ -123,12 +142,15 @@ public:
 private:
 	FFT forwardFFT;
 	Image spectrogramImage;
+	float realMaxLevelArray[20]; // hold the maximum values in the last few frames
+	float useMaxLevel = 1e-5f;
 
 	float fftData[2 * fftSize];
 	int fifoIndex = 0;
 	int startIndex = 0;// the starting index for a segment (fftSize*NumFFT) that start the fft
 	int NumFFT = 0; // how many fftblocks do we need to perform when timer is called
 	bool nextFFTBlockReady;
+
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpectrogramComponent)
