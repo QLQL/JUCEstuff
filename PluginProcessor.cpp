@@ -10,8 +10,6 @@
 
 #include "PluginProcessor.h"
 #include "EasyGUI.h"
-//#include "SpectrogramPlot.h"
-//using namespace std;
 
 //==============================================================================
 S3abuttonAudioProcessor::S3abuttonAudioProcessor()
@@ -27,7 +25,7 @@ S3abuttonAudioProcessor::S3abuttonAudioProcessor()
 #endif
 {
 	plotSpect.startTimer(100);
-	iccc.startTimer(2000);
+	iccc.startTimer(800);
 }
 
 S3abuttonAudioProcessor::~S3abuttonAudioProcessor()

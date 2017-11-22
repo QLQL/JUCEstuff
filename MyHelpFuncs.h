@@ -46,7 +46,7 @@ void peakFinder<T>::findPeaks(T** buffer, int frameN, int num) // suppose it is 
 
 	int* overallBuffer = new int[num];
 	for (int i = 0;i < num;++i)
-		overallBuffer[i] = 0;
+		overallBuffer[i] = 0;// count the number of peaks for each candidate delays
 	for (int frame = 0;frame < frameN;++frame)
 	{
 		
@@ -55,19 +55,28 @@ void peakFinder<T>::findPeaks(T** buffer, int frameN, int num) // suppose it is 
 
 		// find the maximum value in the current frame
 		T* peakPosition = std::max_element(tempBuffer, tempBuffer + num);
-		int peakPositionIndex = peakPosition - tempBuffer;
-		
+		T* vallyPosition = std::min_element(tempBuffer, tempBuffer + num);
 
-		T maxV = *peakPosition;
-		T newMaxV = maxV;
-		while (newMaxV>=0.95*maxV)
+		if (peakPosition == vallyPosition) // all the values are the same
 		{
-			overallBuffer[peakPositionIndex]++;
-			tempBuffer[peakPositionIndex] = 0; // we assume the peak value is bigger than 0
-			// find the new maximum
-			peakPosition = std::max_element(tempBuffer, tempBuffer + num);
-			peakPositionIndex = peakPosition - tempBuffer;
-			newMaxV = *peakPosition;
+
+		}
+		else
+		{
+			int peakPositionIndex = peakPosition - tempBuffer;
+
+			// If there are values similar to the peak value, we also assume them as peak values
+			T maxV = *peakPosition;
+			T newMaxV = maxV;
+			while ((newMaxV>0.95*maxV) && (maxV>0)) // we assume the peak value is bigger than 0
+			{
+				overallBuffer[peakPositionIndex]++;
+				tempBuffer[peakPositionIndex] = 0;
+				// find the new maximum
+				peakPosition = std::max_element(tempBuffer, tempBuffer + num);
+				peakPositionIndex = peakPosition - tempBuffer;
+				newMaxV = *peakPosition;
+			}
 		}
 
 	}

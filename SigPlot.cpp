@@ -35,7 +35,7 @@ void Sig1Dplot::paint(Graphics& g)
 
 		g.setColour(Colours::lightgrey);
 		g.setOpacity(0.5f);
-		drawRowData_Bar(g, plotData[1], sampleNlist[0]);
+		drawRowData_Bar(g, plotData[1], sampleNlist[1]);
 	}
 	
 }
